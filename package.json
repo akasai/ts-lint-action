@@ -1,0 +1,40 @@
+{
+  "name": "ts-lint-action",
+  "version": "1.0.0",
+  "description": "check ts-lint with github-actions",
+  "main": "index.ts",
+  "scripts": {
+    "start:dev": "ts-node index.ts",
+    "start:prod": "npm run build; node ./dist/index.js",
+    "build": "tsc"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/akasai/ts-lint-action.git"
+  },
+  "keywords": [
+    "github",
+    "actions",
+    "typescript",
+    "tslint"
+  ],
+  "author": "akasai",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/akasai/ts-lint-action/issues"
+  },
+  "homepage": "https://github.com/akasai/ts-lint-action#readme",
+  "devDependencies": {
+    "@types/node": "^13.5.0",
+    "ts-node": "^8.6.2"
+  },
+  "dependencies": {
+    "@actions/core": "^1.2.2",
+    "@actions/github": "^2.1.0",
+    "@octokit/rest": "^16.38.2",
+    "@types/glob": "^7.1.1",
+    "glob": "^7.1.6",
+    "tslint": "^6.0.0",
+    "typescript": "^3.7.5"
+  }
+}
