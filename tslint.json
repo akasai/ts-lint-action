@@ -1,0 +1,101 @@
+{
+  "defaultSeverity": "warning",
+  "extends": [
+    "tslint:recommended"
+  ],
+  "jsRules": {
+    "no-unused-expression": true
+  },
+  "rules": {
+    "no-unused-expression": true,
+    "eofline": true,
+    "quotemark": [
+      true,
+      "single"
+    ],
+    "indent": [
+      true,
+      "spaces",
+      2
+    ],
+    "member-access": [
+      true,
+      "no-public"
+    ],
+    "ordered-imports": [
+      true,
+      {
+        "import-sources-order": "case-insensitive",
+        "named-imports-order": "case-insensitive"
+      }
+    ],
+    "max-line-length": [
+      true,
+      140
+    ],
+    "member-ordering": [
+      true,
+      {
+        "order": "statics-first"
+      }
+    ],
+    "curly": [
+      true,
+      "ignore-same-line"
+    ],
+    "interface-name": [
+      true,
+      "always-prefix"
+    ],
+    "array-type": false,
+    "no-empty-interface": false,
+    "no-empty": false,
+    "arrow-parens": true,
+    "object-literal-sort-keys": false,
+    "max-classes-per-file": false,
+    "variable-name": [
+      true,
+      "ban-keywords"
+    ],
+    "one-line": [
+      true,
+      "check-catch",
+      "check-finally",
+      "check-else",
+      "check-open-brace",
+      "check-whitespace"
+    ],
+    "one-variable-per-declaration": [
+      true,
+      "ignore-for-loop"
+    ],
+    "semicolon": [
+      true,
+      "never"
+    ],
+    "trailing-comma": [
+      true,
+      {
+        "multiline": "always",
+        "singleline": "never"
+      }
+    ],
+    "no-console": [
+      false,
+      "log",
+      "error"
+    ],
+    "no-any": false,
+    "no-null-keyword": true,
+    "no-var-keyword": true,
+    "no-unsafe-finally": true,
+    "triple-equals": [
+      true,
+      "allow-null-check",
+      "allow-undefined-check"
+    ],
+    "use-isnan": false,
+    "class-name": true
+  },
+  "rulesDirectory": []
+}
