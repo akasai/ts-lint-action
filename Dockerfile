@@ -12,4 +12,6 @@ RUN npm ci --production
 
 RUN npm run build
 
-ENTRYPOINT ["npm", "run", "start:prod"]
+COPY entrypoint.sh /usr/src/app
+
+ENTRYPOINT ["./entrypoint.sh"]
