@@ -44,9 +44,10 @@ const main = async () => {
         return d.filename && new RegExp(/\.ts$/g).test(d.filename) ? d.filename : ''
       })
     }
-
+console.log('### fileList', fileList)
     for (let i = 0; i < fileList.length; i++) {
       const filename = fileList[i]
+      console.log('### filename', filename)
       if (!filename) return
       const inFileContents = fs.readFileSync(filename, 'utf8')
       const configuration = Configuration.findConfiguration(lintFile, filename).results
