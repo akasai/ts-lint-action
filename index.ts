@@ -13,7 +13,7 @@ enum CONCLUSION {
 }
 
 const main = async () => {
-  console.log('### github.context', github.context)
+  console.log('### github.context', github)
   const { repo: { owner, repo }, sha: head_sha } = github.context
 
   try {
@@ -57,10 +57,10 @@ const main = async () => {
     //   commit_sha: head_sha
     // })
 
-    const test = await gitToolkit.pulls.list({
+    const test = await gitToolkit.git.getCommit({
       owner,
       repo,
-      base: head_sha,
+      commit_sha: head_sha
     })
     console.log('### test', test)
 
