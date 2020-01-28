@@ -14,8 +14,9 @@ enum CONCLUSION {
 
 const main = async () => {
   console.log('### github.context', github.context)
-  const { repo: { owner, repo }, sha: head_sha, ref } = github.context
+  const { repo: { owner, repo }, sha: head_sha, ref, commits } = github.context
 
+  console.log('### commits', commits)
   try {
     const lintFile = core.getInput('lintFile', { required: true }) // lintFile
     const pattern = core.getInput('pattern', { required: true }) // file pattern
@@ -52,29 +53,11 @@ const main = async () => {
     //   pull_number
     // })
 
-    const test = await gitToolkit.pulls.list({
-      owner,
-      repo,
-      head: ref
+    const test = await gitToolkit.search.issuesAndPullRequests({
+      q: `sha:${head_sha}`
     })
     // console.log('### test', test.data[0])
     console.log('### test', test)
-
-    const test1 = await gitToolkit.pulls.list({
-      owner,
-      repo,
-      head: head_sha
-    })
-
-    console.log('### test1', test1)
-
-    const test2 = await gitToolkit.pulls.list({
-      owner,
-      repo,
-      head: 'flitto:feature/WF-914'
-    })
-
-    console.log('### test1', test2)
 
     await gitToolkit.checks.create({
       owner,
