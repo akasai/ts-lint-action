@@ -34,6 +34,7 @@ const main = async () => {
     const lintResult = linter.getResult()
 
     const gitToolkit: Octokit = new github.GitHub(token)
+
     const annotations: Octokit.ChecksCreateParamsOutputAnnotations[] = lintResult.failures.map((failure) => {
       const level = { 'warning': 'warning', 'error': 'failure', 'off': 'notice' }[failure.getRuleSeverity()] || 'notice'
       return {
@@ -44,6 +45,14 @@ const main = async () => {
         message: `${failure.getRuleName()}: ${failure.getFailure()}`,
       }
     })
+
+    const test = await gitToolkit.git.getTree({
+      owner,
+      repo,
+      tree_sha: head_sha
+    })
+
+    console.log('### test', test)
 
     await gitToolkit.checks.create({
       owner,
