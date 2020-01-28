@@ -20,11 +20,14 @@ const main = async () => {
     const pattern = core.getInput('pattern', { required: true }) // file pattern
     const token = core.getInput('token', { required: true }) // github token
     const strict = core.getInput('strict') // TODO: check strict
-
+    
+    console.log('### lintFile', lintFile)
+    console.log('### pattern', pattern)
     const linter = new Linter({ fix: false, formatter: 'json' })
 
     const fileList = glob.sync(pattern, { dot: true, ignore: ['./node_modules/**'] })
     fileList.forEach((file) => {
+      console.log('### file', file)
       const inFileContents = fs.readFileSync(file, 'utf8')
       const configuration = Configuration.findConfiguration(lintFile, file).results
       linter.lint(file, inFileContents, configuration)
