@@ -40,7 +40,7 @@ const main = async () => {
       const pull_number = prData.items[0].number
 
       const { data: prInfo } = await gitToolkit.pulls.listFiles({ owner, repo, pull_number })
-      fileList = prInfo.map((d) => d.filename).filter((file) => new RegExp(/\.ts$/).test(file))
+      fileList = prInfo.map((d) => d.filename).filter((file) => new RegExp(/\.ts$/g).test(file))
     }
 
     fileList.forEach((file) => {
