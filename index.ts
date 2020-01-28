@@ -13,6 +13,7 @@ enum CONCLUSION {
 }
 
 const main = async () => {
+  console.log('### github.context', github.context)
   const { repo: { owner, repo }, sha: head_sha } = github.context
 
   try {
@@ -29,9 +30,9 @@ const main = async () => {
       const configuration = Configuration.findConfiguration(lintFile, file).results
       linter.lint(file, inFileContents, configuration)
     })
-console.log('### 123', 123)
+
     const lintResult = linter.getResult()
-console.log('### lintResult', lintResult)
+
     const gitToolkit: Octokit = new github.GitHub(token)
     const annotations: Octokit.ChecksCreateParamsOutputAnnotations[] = lintResult.failures.map((failure) => {
       const level = { 'warning': 'warning', 'error': 'failure', 'off': 'notice' }[failure.getRuleSeverity()] || 'notice'
