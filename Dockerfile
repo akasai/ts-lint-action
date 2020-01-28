@@ -14,4 +14,4 @@ RUN npm run build
 
 COPY entrypoint.sh /usr/src/app
 
-ENTRYPOINT ["./entrypoint.sh"]
+ENTRYPOINT ["/usr/src/app/entrypoint.sh"]
