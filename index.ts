@@ -13,8 +13,8 @@ enum CONCLUSION {
 }
 
 const main = async () => {
-  console.log('### github.context', github)
-  const { repo: { owner, repo }, sha: head_sha } = github.context
+  console.log('### github.context', github.context)
+  const { repo: { owner, repo }, sha: head_sha, ref } = github.context
 
   try {
     const lintFile = core.getInput('lintFile', { required: true }) // lintFile
@@ -51,16 +51,11 @@ const main = async () => {
     //   repo,
     //   pull_number
     // })
-    // const test = await gitToolkit.git.getCommit({
-    //   owner,
-    //   repo,
-    //   commit_sha: head_sha
-    // })
 
-    const test = await gitToolkit.git.getCommit({
+    const test = await gitToolkit.pulls.list({
       owner,
       repo,
-      commit_sha: head_sha
+      base: ref
     })
     console.log('### test', test)
 
