@@ -21,7 +21,7 @@ const main = async () => {
     const pattern = core.getInput('pattern', { required: true }) // file pattern
     const token = core.getInput('token', { required: true }) // github token
     const strict = core.getInput('strict') // TODO: check strict
-    
+
     const linter = new Linter({ fix: false, formatter: 'json' })
 
     const fileList = glob.sync(pattern, { dot: true, ignore: ['./node_modules/**'] })
@@ -46,13 +46,23 @@ const main = async () => {
       }
     })
 
-    const test = await gitToolkit.git.getCommit({
+    // const test = await gitToolkit.pulls.listFiles({
+    //   owner,
+    //   repo,
+    //   pull_number
+    // })
+    // const test = await gitToolkit.git.getCommit({
+    //   owner,
+    //   repo,
+    //   commit_sha: head_sha
+    // })
+
+    const test = await gitToolkit.pulls.list({
       owner,
       repo,
-      commit_sha: head_sha
+      base: head_sha,
     })
-
-    console.log('### test', test.data.tree)
+    console.log('### test', test)
 
     await gitToolkit.checks.create({
       owner,
