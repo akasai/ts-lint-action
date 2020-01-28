@@ -22,8 +22,8 @@ const main = async () => {
 
   try {
     const lintFile = core.getInput('lintFile', { required: true }) // lintFile
-    const pattern = core.getInput('pattern') // file pattern
     const token = core.getInput('token', { required: true }) // github token
+    const pattern = core.getInput('pattern') // file pattern
     const target = core.getInput('target') || LINT_TARGET.PR // ALL || PR (default)
 
     if (target && ![LINT_TARGET.ALL, LINT_TARGET.PR].includes(target as LINT_TARGET)) throw new Error('Bad Request: target parameter is not valid (all, pr).')
@@ -40,11 +40,14 @@ const main = async () => {
       const pull_number = prData.items[0].number
 
       const { data: prInfo } = await gitToolkit.pulls.listFiles({ owner, repo, pull_number })
-      fileList = prInfo.map((d) => d.filename && new RegExp(/\.ts$/g).test(d.filename))
+      fileList = prInfo.map((d) => {
+        return d.filename && new RegExp(/\.ts$/g).test(d.filename) ? d.filename : ''
+      })
     }
 
     for (let i = 0; i < fileList.length; i++) {
       const filename = fileList[i]
+      if (!filename) return
       const inFileContents = fs.readFileSync(filename, 'utf8')
       const configuration = Configuration.findConfiguration(lintFile, filename).results
       linter.lint(filename, inFileContents, configuration)
@@ -79,7 +82,7 @@ const main = async () => {
       },
     })
   } catch (err) {
-    core.setFailed(`Action failed with error ${err}`)
+    core.setFailed(`Action failed with error: ${err}`)
   }
 }
 
