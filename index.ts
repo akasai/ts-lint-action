@@ -16,7 +16,6 @@ const main = async () => {
   console.log('### github.context', github.context)
   const { repo: { owner, repo }, sha: head_sha, ref, payload: { head_commit: { tree_id } } } = github.context
 
-  console.log('### commits', payload)
   try {
     const lintFile = core.getInput('lintFile', { required: true }) // lintFile
     const pattern = core.getInput('pattern', { required: true }) // file pattern
