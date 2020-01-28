@@ -9,36 +9,40 @@ type LEVEL = 'notice' | 'warning' | 'failure'
 
 enum CONCLUSION {
   FAILURE = 'failure',
-  SUCCESS = 'success'
+  SUCCESS = 'success',
+}
+
+enum LINT_TARGET {
+  ALL = 'all',
+  PR = 'pr',
 }
 
 const main = async () => {
-  console.log('### github.context', github.context)
-  const { repo: { owner, repo }, sha: head_sha, ref, payload: { head_commit: { tree_id } } } = github.context
+  const { repo: { owner, repo }, sha: head_sha } = github.context
 
   try {
     const lintFile = core.getInput('lintFile', { required: true }) // lintFile
     const pattern = core.getInput('pattern', { required: true }) // file pattern
     const token = core.getInput('token', { required: true }) // github token
-    const strict = core.getInput('strict') // TODO: check strict
+    const target = core.getInput('target') // ALL || PR (default)
 
+    if (target && [LINT_TARGET.ALL, LINT_TARGET.PR].includes(target as LINT_TARGET)) throw new Error('Bad Request: target parameter is not valid (all, pr)')
+
+    const isALL = target || LINT_TARGET.PR
+    const gitToolkit: Octokit = new github.GitHub(token)
     const linter = new Linter({ fix: false, formatter: 'json' })
 
-    const gitToolkit: Octokit = new github.GitHub(token)
+    let fileList
+    if (isALL) {
+      fileList = glob.sync(pattern, { dot: true, ignore: ['./node_modules/**'] })
+    } else {
+      const { data: prData } = await gitToolkit.search.issuesAndPullRequests({ q: `sha:${head_sha}` })
+      const pull_number = prData.items[0].number
 
+      const { data: prInfo } = await gitToolkit.pulls.listFiles({ owner, repo, pull_number })
+      fileList = prInfo.map((d) => d.filename)
+    }
 
-    const test = await gitToolkit.search.issuesAndPullRequests({
-      q: `sha:${head_sha}`,
-    })
-    const pull_number = test.data.items[0].number
-
-    const test2 = await gitToolkit.pulls.listFiles({
-      owner,
-      repo,
-      pull_number
-    })
-    const fileList = test2.data.map((d) =>  d.filename)
-    // const fileList = glob.sync(pattern, { dot: true, ignore: ['./node_modules/**'] })
     fileList.forEach((file) => {
       const inFileContents = fs.readFileSync(file, 'utf8')
       const configuration = Configuration.findConfiguration(lintFile, file).results
@@ -57,6 +61,8 @@ const main = async () => {
         message: `${failure.getRuleName()}: ${failure.getFailure()}`,
       }
     })
+
+    if (annotations.length > 50) annotations.length = 50 // checks limit: 50
 
     await gitToolkit.checks.create({
       owner,
