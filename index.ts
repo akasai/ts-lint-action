@@ -9,7 +9,12 @@ type LEVEL = 'notice' | 'warning' | 'failure'
 
 enum CONCLUSION {
   FAILURE = 'failure',
-  SUCCESS = 'success'
+  SUCCESS = 'success',
+}
+
+enum LINT_TARGET {
+  ALL = 'all',
+  PR = 'pr',
 }
 
 const main = async () => {
@@ -17,22 +22,39 @@ const main = async () => {
 
   try {
     const lintFile = core.getInput('lintFile', { required: true }) // lintFile
-    const pattern = core.getInput('pattern', { required: true }) // file pattern
     const token = core.getInput('token', { required: true }) // github token
-    const strict = core.getInput('strict') // TODO: check strict
+    const pattern = core.getInput('pattern') // file pattern
+    const target = core.getInput('target') || LINT_TARGET.PR // ALL || PR (default)
 
+    if (target && ![LINT_TARGET.ALL, LINT_TARGET.PR].includes(target as LINT_TARGET)) throw new Error('Bad Request: target parameter is not valid (all, pr).')
+    if (target === LINT_TARGET.ALL && !pattern) throw new Error('Bad Request: all target must need pattern parameter.')
+
+    const gitToolkit: Octokit = new github.GitHub(token)
     const linter = new Linter({ fix: false, formatter: 'json' })
 
-    const fileList = glob.sync(pattern, { dot: true, ignore: ['./node_modules/**'] })
-    fileList.forEach((file) => {
-      const inFileContents = fs.readFileSync(file, 'utf8')
-      const configuration = Configuration.findConfiguration(lintFile, file).results
-      linter.lint(file, inFileContents, configuration)
-    })
+    let fileList
+    if (target === LINT_TARGET.ALL) {
+      fileList = glob.sync(pattern, { dot: true, ignore: ['./node_modules/**'] })
+    } else {
+      const { data: prData } = await gitToolkit.search.issuesAndPullRequests({ q: `sha:${head_sha}` })
+      const pull_number = prData.items[0].number
+
+      const { data: prInfo } = await gitToolkit.pulls.listFiles({ owner, repo, pull_number })
+      fileList = prInfo.map((d) => {
+        return d.filename && new RegExp(/\.ts$/g).test(d.filename) ? d.filename : ''
+      })
+    }
+
+    for (let i = 0; i < fileList.length; i++) {
+      const filename = fileList[i]
+      if (!filename) continue
+      const inFileContents = fs.readFileSync(filename, 'utf8')
+      const configuration = Configuration.findConfiguration(lintFile, filename).results
+      linter.lint(filename, inFileContents, configuration)
+    }
 
     const lintResult = linter.getResult()
 
-    const gitToolkit: Octokit = new github.GitHub(token)
     const annotations: Octokit.ChecksCreateParamsOutputAnnotations[] = lintResult.failures.map((failure) => {
       const level = { 'warning': 'warning', 'error': 'failure', 'off': 'notice' }[failure.getRuleSeverity()] || 'notice'
       return {
@@ -43,6 +65,8 @@ const main = async () => {
         message: `${failure.getRuleName()}: ${failure.getFailure()}`,
       }
     })
+
+    if (annotations.length > 50) annotations.length = 50 // checks limit: 50
 
     await gitToolkit.checks.create({
       owner,
@@ -58,7 +82,7 @@ const main = async () => {
       },
     })
   } catch (err) {
-    core.setFailed(`Action failed with error ${err}`)
+    core.setFailed(`Action failed with error: ${err}`)
   }
 }
 
