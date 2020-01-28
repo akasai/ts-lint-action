@@ -46,25 +46,20 @@ const main = async () => {
       }
     })
 
-    // const test = await gitToolkit.pulls.listFiles({
-    //   owner,
-    //   repo,
-    //   pull_number
-    // })
-
-    const tree = await gitToolkit.git.getTree({
-      owner,
-      repo,
-      tree_sha: tree_id,
-    })
-
-    console.log('###  tree',  tree)
     const test = await gitToolkit.search.issuesAndPullRequests({
       q: `sha:${head_sha}`,
     })
-    // console.log('### test', test.data[0])
-    console.log('### test', test.data.items)
+    const pull_number = test.data.items[0].number
 
+    const test2 = await gitToolkit.pulls.listFiles({
+      owner,
+      repo,
+      pull_number
+    })
+    
+    console.log('### test2.data', test2.data)
+    
+    
     await gitToolkit.checks.create({
       owner,
       repo,
