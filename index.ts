@@ -21,20 +21,18 @@ const main = async () => {
     const token = core.getInput('token', { required: true }) // github token
     const strict = core.getInput('strict') // TODO: check strict
     
-    console.log('### lintFile', lintFile)
-    console.log('### pattern', pattern)
     const linter = new Linter({ fix: false, formatter: 'json' })
 
     const fileList = glob.sync(pattern, { dot: true, ignore: ['./node_modules/**'] })
     fileList.forEach((file) => {
-      console.log('### file', file)
       const inFileContents = fs.readFileSync(file, 'utf8')
       const configuration = Configuration.findConfiguration(lintFile, file).results
+      console.log('### configuration', configuration)
       linter.lint(file, inFileContents, configuration)
     })
-
+console.log('### 123', 123)
     const lintResult = linter.getResult()
-
+console.log('### lintResult', lintResult)
     const gitToolkit: Octokit = new github.GitHub(token)
     const annotations: Octokit.ChecksCreateParamsOutputAnnotations[] = lintResult.failures.map((failure) => {
       const level = { 'warning': 'warning', 'error': 'failure', 'off': 'notice' }[failure.getRuleSeverity()] || 'notice'
