@@ -55,7 +55,6 @@ const main = async () => {
     const test = await gitToolkit.pulls.list({
       owner,
       repo,
-      base: ref
     })
     console.log('### test', test)
 
