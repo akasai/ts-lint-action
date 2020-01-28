@@ -24,7 +24,21 @@ const main = async () => {
 
     const linter = new Linter({ fix: false, formatter: 'json' })
 
-    const fileList = glob.sync(pattern, { dot: true, ignore: ['./node_modules/**'] })
+    const gitToolkit: Octokit = new github.GitHub(token)
+
+
+    const test = await gitToolkit.search.issuesAndPullRequests({
+      q: `sha:${head_sha}`,
+    })
+    const pull_number = test.data.items[0].number
+
+    const test2 = await gitToolkit.pulls.listFiles({
+      owner,
+      repo,
+      pull_number
+    })
+    const fileList = test2.data.map((d) =>  d.filename)
+    // const fileList = glob.sync(pattern, { dot: true, ignore: ['./node_modules/**'] })
     fileList.forEach((file) => {
       const inFileContents = fs.readFileSync(file, 'utf8')
       const configuration = Configuration.findConfiguration(lintFile, file).results
@@ -32,8 +46,6 @@ const main = async () => {
     })
 
     const lintResult = linter.getResult()
-
-    const gitToolkit: Octokit = new github.GitHub(token)
 
     const annotations: Octokit.ChecksCreateParamsOutputAnnotations[] = lintResult.failures.map((failure) => {
       const level = { 'warning': 'warning', 'error': 'failure', 'off': 'notice' }[failure.getRuleSeverity()] || 'notice'
@@ -46,20 +58,6 @@ const main = async () => {
       }
     })
 
-    const test = await gitToolkit.search.issuesAndPullRequests({
-      q: `sha:${head_sha}`,
-    })
-    const pull_number = test.data.items[0].number
-
-    const test2 = await gitToolkit.pulls.listFiles({
-      owner,
-      repo,
-      pull_number
-    })
-    
-    console.log('### test2.data', test2.data)
-    
-    
     await gitToolkit.checks.create({
       owner,
       repo,
