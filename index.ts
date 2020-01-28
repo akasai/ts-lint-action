@@ -24,16 +24,15 @@ const main = async () => {
     const lintFile = core.getInput('lintFile', { required: true }) // lintFile
     const pattern = core.getInput('pattern', { required: true }) // file pattern
     const token = core.getInput('token', { required: true }) // github token
-    const target = core.getInput('target') // ALL || PR (default)
+    const target = core.getInput('target') || LINT_TARGET.PR // ALL || PR (default)
 
-    if (target && [LINT_TARGET.ALL, LINT_TARGET.PR].includes(target as LINT_TARGET)) throw new Error('Bad Request: target parameter is not valid (all, pr)')
+    if (target && ![LINT_TARGET.ALL, LINT_TARGET.PR].includes(target as LINT_TARGET)) throw new Error('Bad Request: target parameter is not valid (all, pr)')
 
-    const isALL = target || LINT_TARGET.PR
     const gitToolkit: Octokit = new github.GitHub(token)
     const linter = new Linter({ fix: false, formatter: 'json' })
 
     let fileList
-    if (isALL) {
+    if (target === LINT_TARGET.ALL) {
       fileList = glob.sync(pattern, { dot: true, ignore: ['./node_modules/**'] })
     } else {
       const { data: prData } = await gitToolkit.search.issuesAndPullRequests({ q: `sha:${head_sha}` })
