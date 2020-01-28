@@ -27,7 +27,6 @@ const main = async () => {
     fileList.forEach((file) => {
       const inFileContents = fs.readFileSync(file, 'utf8')
       const configuration = Configuration.findConfiguration(lintFile, file).results
-      console.log('### configuration', configuration)
       linter.lint(file, inFileContents, configuration)
     })
 console.log('### 123', 123)
