@@ -14,9 +14,9 @@ enum CONCLUSION {
 
 const main = async () => {
   console.log('### github.context', github.context)
-  const { repo: { owner, repo }, sha: head_sha, ref, commits } = github.context
+  const { repo: { owner, repo }, sha: head_sha, ref, payload } = github.context
 
-  console.log('### commits', commits)
+  console.log('### commits', payload)
   try {
     const lintFile = core.getInput('lintFile', { required: true }) // lintFile
     const pattern = core.getInput('pattern', { required: true }) // file pattern
