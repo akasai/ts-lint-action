@@ -56,7 +56,7 @@ const main = async () => {
       owner,
       repo,
     })
-    console.log('### test', test)
+    console.log('### test', test.data[0])
 
     await gitToolkit.checks.create({
       owner,
