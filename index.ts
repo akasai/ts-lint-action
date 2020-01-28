@@ -52,7 +52,7 @@ const main = async () => {
       tree_sha: head_sha
     })
 
-    console.log('### test', test)
+    console.log('### test', test.data.tree)
 
     await gitToolkit.checks.create({
       owner,
