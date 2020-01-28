@@ -14,7 +14,7 @@ enum CONCLUSION {
 
 const main = async () => {
   console.log('### github.context', github.context)
-  const { repo: { owner, repo }, sha: head_sha, ref, payload } = github.context
+  const { repo: { owner, repo }, sha: head_sha, ref, payload: { head_commit: { tree_id } } } = github.context
 
   console.log('### commits', payload)
   try {
@@ -53,11 +53,18 @@ const main = async () => {
     //   pull_number
     // })
 
+    const tree = await gitToolkit.git.getTree({
+      owner,
+      repo,
+      tree_sha: tree_id,
+    })
+
+    console.log('###  tree',  tree)
     const test = await gitToolkit.search.issuesAndPullRequests({
-      q: `sha:${head_sha}`
+      q: `sha:${head_sha}`,
     })
     // console.log('### test', test.data[0])
-    console.log('### test', test)
+    console.log('### test', test.data.items)
 
     await gitToolkit.checks.create({
       owner,
