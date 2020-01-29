@@ -37,6 +37,7 @@ const main = async () => {
       fileList = glob.sync(pattern, { dot: true, ignore: ['./node_modules/**'] })
     } else {
       const { data: prData } = await gitToolkit.search.issuesAndPullRequests({ q: `sha:${head_sha}` })
+      console.log('### prData', prData)
       const pull_number = prData.items[0].number
 
       const { data: prInfo } = await gitToolkit.pulls.listFiles({ owner, repo, pull_number })
