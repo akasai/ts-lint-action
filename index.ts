@@ -36,6 +36,21 @@ const main = async () => {
     if (target === LINT_TARGET.ALL) {
       fileList = glob.sync(pattern, { dot: true, ignore: ['./node_modules/**'] })
     } else {
+      const { data: commit } = await gitToolkit.git.getCommit({
+        owner,
+        repo,
+        commit_sha: head_sha,
+      })
+
+      console.log('### commit.tree.sha', commit.tree.sha)
+
+      const {data: tree} = await gitToolkit.git.getTree({
+        owner,
+        repo,
+        tree_sha: commit.tree.sha
+      })
+      console.log('### tree', tree)
+
       const { data: prData } = await gitToolkit.search.issuesAndPullRequests({ q: `sha:${head_sha}` })
       console.log('### prData', prData)
       const pull_number = prData.items[0].number
