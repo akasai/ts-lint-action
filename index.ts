@@ -47,7 +47,8 @@ const main = async () => {
       const {data: tree} = await gitToolkit.git.getTree({
         owner,
         repo,
-        tree_sha: commit.tree.sha
+        tree_sha: commit.tree.sha,
+        recursive: '1'
       })
       console.log('### tree', tree)
 
