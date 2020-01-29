@@ -18,6 +18,7 @@ enum LINT_TARGET {
 }
 
 const main = async () => {
+  console.log('### github.context', github.context)
   const { repo: { owner, repo }, sha: head_sha } = github.context
 
   try {
@@ -53,7 +54,9 @@ const main = async () => {
       console.log('### tree', tree)
 
       const { data: prData } = await gitToolkit.search.issuesAndPullRequests({ q: `sha:${head_sha}` })
-      console.log('### prData', prData)
+      if (!prData.items.length) {
+        // 첫 PR || PR이 없이 PUSH만.
+      }
       const pull_number = prData.items[0].number
 
       const { data: prInfo } = await gitToolkit.pulls.listFiles({ owner, repo, pull_number })
