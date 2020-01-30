@@ -42,8 +42,7 @@ const main = async () => {
         repo,
         commit_sha: head_sha,
       })
-
-      console.log('### commit.tree.sha', commit.tree.sha)
+      console.log('### commit.tree.sha', commit)
 
       const {data: tree} = await gitToolkit.git.getTree({
         owner,
