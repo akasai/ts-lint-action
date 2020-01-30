@@ -37,12 +37,18 @@ const main = async () => {
       fileList = glob.sync(pattern, { dot: true, ignore: ['./node_modules/**'] })
     } else {
       const { data: prData } = await gitToolkit.search.issuesAndPullRequests({ q: `sha:${head_sha}` })
-      const pull_number = prData.items[0].number
 
-      const { data: prInfo } = await gitToolkit.pulls.listFiles({ owner, repo, pull_number })
-      fileList = prInfo.map((d) => {
-        return d.filename && new RegExp(/\.ts$/g).test(d.filename) ? d.filename : ''
-      })
+      if (!prData.items.length) { // if pull_request is not exist = first pr
+        const { data: commit } = await gitToolkit.repos.getCommit({ owner, repo, ref: head_sha })
+        fileList = commit.files.map((d) => {
+          return d.filename && new RegExp(/\.ts$/g).test(d.filename) ? d.filename : ''
+        })
+      } else { // if pull_request is exist
+        const { data: prInfo } = await gitToolkit.pulls.listFiles({ owner, repo, pull_number: prData.items[0].number })
+        fileList = prInfo.map((d) => {
+          return d.filename && new RegExp(/\.ts$/g).test(d.filename) ? d.filename : ''
+        })
+      }
     }
 
     for (let i = 0; i < fileList.length; i++) {
