@@ -37,10 +37,10 @@ const main = async () => {
     if (target === LINT_TARGET.ALL) {
       fileList = glob.sync(pattern, { dot: true, ignore: ['./node_modules/**'] })
     } else {
-      const { data: commit } = await gitToolkit.git.getCommit({
+      const { data: commit } = await gitToolkit.repos.getCommit({
         owner,
         repo,
-        commit_sha: head_sha,
+        ref: head_sha,
       })
       console.log('### commit.tree.sha', commit)
 
