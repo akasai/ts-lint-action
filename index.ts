@@ -42,15 +42,7 @@ const main = async () => {
         repo,
         ref: head_sha,
       })
-      console.log('### commit.tree.sha', commit)
-
-      const {data: tree} = await gitToolkit.git.getTree({
-        owner,
-        repo,
-        tree_sha: commit.tree.sha,
-        recursive: '1'
-      })
-      console.log('### tree', tree)
+      console.log('### commit', commit)
 
       const { data: prData } = await gitToolkit.search.issuesAndPullRequests({ q: `sha:${head_sha}` })
       if (!prData.items.length) {
