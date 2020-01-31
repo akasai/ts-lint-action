@@ -60,7 +60,7 @@ const main = async () => {
     for (let i = 0; i < fileList.length; i++) {
       const filename = fileList[i]
       if (!filename) continue
-      const t = fs.statSync(filename)
+      const t = fs.existsSync(filename)
 console.log('### t', t)
       const inFileContents = fs.readFileSync(filename, 'utf8')
       const configuration = Configuration.findConfiguration(lintFile, filename).results
