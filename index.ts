@@ -124,18 +124,18 @@ const main = async () => {
     //   },
     // })
 
-    await gitToolkit.checks.update({
-      owner,
-      repo,
-      check_run_id: check.data.id,
-      name: LINTER,
-      status: 'completed',
-      conclusion: lintResult.errorCount ? CONCLUSION.FAILURE : CONCLUSION.SUCCESS,
-      output: {
-        title: 'Tslint Check Report',
-        summary: `${lintResult.errorCount} errors\n${lintResult.warningCount} warnings`,
-      },
-    })
+    // await gitToolkit.checks.update({
+    //   owner,
+    //   repo,
+    //   check_run_id: check.data.id,
+    //   name: LINTER,
+    //   status: 'completed',
+    //   conclusion: lintResult.errorCount ? CONCLUSION.FAILURE : CONCLUSION.SUCCESS,
+    //   output: {
+    //     title: 'Tslint Check Report',
+    //     summary: `${lintResult.errorCount} errors\n${lintResult.warningCount} warnings`,
+    //   },
+    // })
   } catch (err) {
     core.setFailed(`Action failed with error: ${err}`)
   }
