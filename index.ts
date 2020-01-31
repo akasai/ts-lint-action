@@ -74,8 +74,8 @@ const main = async () => {
         annotation_level: level as LEVEL,
         title: 'tsLint Checker',
         message: `${failure.getRuleName()}: ${failure.getFailure()}`,
-        start_line: failure.getStartPosition().getLineAndCharacter().line,
-        end_line: failure.getEndPosition().getLineAndCharacter().line,
+        start_line: failure.getStartPosition().getLineAndCharacter().line + 1,
+        end_line: failure.getEndPosition().getLineAndCharacter().line + 1,
       })
       if (annotations.length === 50 || annotations.length === lintResult.failures.length) {
         await gitToolkit.checks.update({
