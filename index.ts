@@ -32,7 +32,7 @@ const main = async () => {
     if (mode === MODE.ALL && !pattern) throw new Error('Bad Request: all target must need pattern parameter.')
 
     const gitToolkit: Octokit = new github.GitHub(token)
-    const check = await gitToolkit.checks.create({ owner, repo, name: LINTER, head_sha, status: 'queued' })
+    const check = await gitToolkit.checks.create({ owner, repo, name: LINTER, head_sha, status: 'in_progress' })
 
     const linter = new Linter({ fix: false, formatter: 'json' })
 
@@ -95,7 +95,7 @@ const main = async () => {
           repo,
           check_run_id: check.data.id,
           name: LINTER,
-          status: 'in_progress',
+          status: 'completed',
           conclusion: lintResult.errorCount ? CONCLUSION.FAILURE : CONCLUSION.SUCCESS,
           output: {
             title: 'Tslint Check Report',
