@@ -10,6 +10,7 @@ type LEVEL = 'notice' | 'warning' | 'failure'
 enum CONCLUSION {
   FAILURE = 'failure',
   SUCCESS = 'success',
+  NEUTRAL = 'neutral',
 }
 
 enum MODE {
@@ -54,7 +55,8 @@ const main = async () => {
         })
       }
     }
-
+    const inFileContents = fs.readFileSync('index.js', 'utf8')
+console.log('### inFileContents', inFileContents)
     for (let i = 0; i < fileList.length; i++) {
       const filename = fileList[i]
       if (!filename) continue
@@ -73,7 +75,7 @@ const main = async () => {
         check_run_id: check.data.id,
         name: LINTER,
         status: 'completed',
-        conclusion: CONCLUSION.SUCCESS,
+        conclusion: CONCLUSION.NEUTRAL,
         output: {
           title: 'Tslint Check Report',
           summary: `0 errors\n0 warnings`,
