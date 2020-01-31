@@ -89,7 +89,7 @@ const main = async () => {
         start_line: failure.getStartPosition().getLineAndCharacter().line,
         end_line: failure.getEndPosition().getLineAndCharacter().line,
       })
-      if (annotations.length === 50) {
+      if (annotations.length === 50 || annotations.length === lintResult.failures.length) {
         await gitToolkit.checks.update({
           owner,
           repo,
