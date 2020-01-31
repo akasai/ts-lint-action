@@ -12,10 +12,12 @@ enum CONCLUSION {
   SUCCESS = 'success',
 }
 
-enum LINT_TARGET {
+enum MODE {
   ALL = 'all',
-  PR = 'pr',
+  COMMIT = 'commit',
 }
+
+const LINTER = 'Linter'
 
 const main = async () => {
   const { repo: { owner, repo }, sha: head_sha } = github.context
@@ -24,16 +26,18 @@ const main = async () => {
     const lintFile = core.getInput('lintFile', { required: true }) // lintFile
     const token = core.getInput('token', { required: true }) // github token
     const pattern = core.getInput('pattern') // file pattern
-    const target = core.getInput('target') || LINT_TARGET.PR // ALL || PR (default)
+    const mode = core.getInput('mode') || MODE.COMMIT // ALL || COMMIT (default)
 
-    if (target && ![LINT_TARGET.ALL, LINT_TARGET.PR].includes(target as LINT_TARGET)) throw new Error('Bad Request: target parameter is not valid (all, pr).')
-    if (target === LINT_TARGET.ALL && !pattern) throw new Error('Bad Request: all target must need pattern parameter.')
+    if (mode && ![MODE.ALL, MODE.COMMIT].includes(mode as MODE)) throw new Error('Bad Request: target parameter is not valid (all, commit).')
+    if (mode === MODE.ALL && !pattern) throw new Error('Bad Request: all target must need pattern parameter.')
 
     const gitToolkit: Octokit = new github.GitHub(token)
+    const check = await gitToolkit.checks.create({ owner, repo, name: LINTER, head_sha, status: 'in_progress' })
+
     const linter = new Linter({ fix: false, formatter: 'json' })
 
     let fileList
-    if (target === LINT_TARGET.ALL) {
+    if (mode === MODE.ALL) {
       fileList = glob.sync(pattern, { dot: true, ignore: ['./node_modules/**'] })
     } else {
       const { data: prData } = await gitToolkit.search.issuesAndPullRequests({ q: `sha:${head_sha}` })
@@ -61,32 +65,35 @@ const main = async () => {
 
     const lintResult = linter.getResult()
 
-    const annotations: Octokit.ChecksCreateParamsOutputAnnotations[] = lintResult.failures.map((failure) => {
+    const annotations: Octokit.ChecksCreateParamsOutputAnnotations[] = []
+
+    for (let failure of lintResult.failures) {
       const level = { 'warning': 'warning', 'error': 'failure', 'off': 'notice' }[failure.getRuleSeverity()] || 'notice'
-      return {
+      annotations.push({
         path: failure.getFileName(),
+        annotation_level: level as LEVEL,
+        title: 'tsLint Checker',
+        message: `${failure.getRuleName()}: ${failure.getFailure()}`,
         start_line: failure.getStartPosition().getLineAndCharacter().line,
         end_line: failure.getEndPosition().getLineAndCharacter().line,
-        annotation_level: level as LEVEL,
-        message: `${failure.getRuleName()}: ${failure.getFailure()}`,
+      })
+      if (annotations.length === 50 || annotations.length === lintResult.failures.length) {
+        await gitToolkit.checks.update({
+          owner,
+          repo,
+          check_run_id: check.data.id,
+          name: LINTER,
+          status: 'completed',
+          conclusion: lintResult.errorCount ? CONCLUSION.FAILURE : CONCLUSION.SUCCESS,
+          output: {
+            title: 'Tslint Check Report',
+            summary: `${lintResult.errorCount} errors\n${lintResult.warningCount} warnings`,
+            annotations,
+          },
+        })
+        annotations.length = 0
       }
-    })
-
-    if (annotations.length > 50) annotations.length = 50 // checks limit: 50
-
-    await gitToolkit.checks.create({
-      owner,
-      repo,
-      head_sha,
-      name: 'Linter',
-      status: 'completed',
-      conclusion: lintResult.errorCount ? CONCLUSION.FAILURE : CONCLUSION.SUCCESS,
-      output: {
-        title: 'Tslint Check Results',
-        summary: `${lintResult.errorCount} errors\n${lintResult.warningCount} warnings`,
-        annotations,
-      },
-    })
+    }
   } catch (err) {
     core.setFailed(`Action failed with error: ${err}`)
   }
