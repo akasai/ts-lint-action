@@ -58,16 +58,13 @@ const main = async () => {
 
     fileList = ['index.js', 'index.ts']
     for (let i = 0; i < fileList.length; i++) {
-      try {
-        const filename = fileList[i]
-        if (!filename) continue
-        const inFileContents = fs.readFileSync(filename, 'utf8')
-        const configuration = Configuration.findConfiguration(lintFile, filename).results
-        linter.lint(filename, inFileContents, configuration)
-      } catch (e) {
-        if (e && e.code && e.code === 'ENOENT') continue
-        throw e
-      }
+      const filename = fileList[i]
+      if (!filename) continue
+      const t = fs.statSync(filename)
+console.log('### t', t)
+      const inFileContents = fs.readFileSync(filename, 'utf8')
+      const configuration = Configuration.findConfiguration(lintFile, filename).results
+      linter.lint(filename, inFileContents, configuration)
     }
 
     const lintResult = linter.getResult()
