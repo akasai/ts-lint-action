@@ -58,7 +58,8 @@ const main = async () => {
     for (let i = 0; i < fileList.length; i++) {
       const filename = fileList[i]
       if (!filename) continue
-      const inFileContents = fs.readFileSync(filename, 'utf8')
+      const inFileContents = fs.readFileSync('index.js', 'utf8')
+      if (!inFileContents) continue
       const configuration = Configuration.findConfiguration(lintFile, filename).results
       linter.lint(filename, inFileContents, configuration)
     }
