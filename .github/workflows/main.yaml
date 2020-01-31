@@ -10,16 +10,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Lint
-<<<<<<< HEAD
         uses: akasai/ts-lint-action@feature/check-file-glob
         with:
           lintFile: 'tslint.json'
           token: ${{ secrets.GITHUB_TOKEN }}
-          pattern: '*.ts'
-          mode: 'all'
-=======
-        uses: akasai/ts-lint-action@1.2.4
-        with:
-          lintFile: 'tslint.json'
-          token: ${{ secrets.GITHUB_TOKEN }}
->>>>>>> master
+
