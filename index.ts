@@ -55,15 +55,18 @@ const main = async () => {
         })
       }
     }
-    const inFileContents = fs.readFileSync('index.js', 'utf8')
-console.log('### inFileContents', inFileContents)
+
     for (let i = 0; i < fileList.length; i++) {
-      const filename = fileList[i]
-      if (!filename) continue
-      const inFileContents = fs.readFileSync('index.js', 'utf8')
-      if (!inFileContents) continue
-      const configuration = Configuration.findConfiguration(lintFile, filename).results
-      linter.lint(filename, inFileContents, configuration)
+      try {
+        const filename = fileList[i]
+        if (!filename) continue
+        const inFileContents = fs.readFileSync('index.js', 'utf8')
+        const configuration = Configuration.findConfiguration(lintFile, filename).results
+        linter.lint(filename, inFileContents, configuration)
+      } catch (e) {
+        console.log('### e', e)
+        throw e
+      }
     }
 
     const lintResult = linter.getResult()
