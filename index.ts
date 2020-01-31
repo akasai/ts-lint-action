@@ -65,6 +65,21 @@ const main = async () => {
 
     const lintResult = linter.getResult()
 
+    if (!lintResult.failures) {
+      await gitToolkit.checks.update({
+        owner,
+        repo,
+        check_run_id: check.data.id,
+        name: LINTER,
+        status: 'completed',
+        conclusion: CONCLUSION.SUCCESS,
+        output: {
+          title: 'Tslint Check Report',
+          summary: `0 errors\n0 warnings`,
+        },
+      })
+    }
+
     const annotations: Octokit.ChecksCreateParamsOutputAnnotations[] = []
 
     for (let failure of lintResult.failures) {
