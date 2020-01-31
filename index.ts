@@ -65,17 +65,20 @@ const main = async () => {
 
     const lintResult = linter.getResult()
 
-    // const annotations: Octokit.ChecksCreateParamsOutputAnnotations[] = lintResult.failures.map((failure) => {
-    //   const level = { 'warning': 'warning', 'error': 'failure', 'off': 'notice' }[failure.getRuleSeverity()] || 'notice'
-    //   return {
-    //     path: failure.getFileName(),
-    //     annotation_level: level as LEVEL,
-    //     title: 'tsLint Checker',
-    //     message: `${failure.getRuleName()}: ${failure.getFailure()}`,
-    //     start_line: failure.getStartPosition().getLineAndCharacter().line,
-    //     end_line: failure.getEndPosition().getLineAndCharacter().line,
-    //   }
-    // })
+    if (!lintResult.failures.length) {
+      await gitToolkit.checks.update({
+        owner,
+        repo,
+        check_run_id: check.data.id,
+        name: LINTER,
+        status: 'completed',
+        conclusion: CONCLUSION.SUCCESS,
+        output: {
+          title: 'Tslint Check Report',
+          summary: `0 errors\n0 warnings`,
+        },
+      })
+    }
 
     const annotations: Octokit.ChecksCreateParamsOutputAnnotations[] = []
 
@@ -86,8 +89,8 @@ const main = async () => {
         annotation_level: level as LEVEL,
         title: 'tsLint Checker',
         message: `${failure.getRuleName()}: ${failure.getFailure()}`,
-        start_line: failure.getStartPosition().getLineAndCharacter().line,
-        end_line: failure.getEndPosition().getLineAndCharacter().line,
+        start_line: failure.getStartPosition().getLineAndCharacter().line + 1,
+        end_line: failure.getEndPosition().getLineAndCharacter().line + 1,
       })
       if (annotations.length === 50 || annotations.length === lintResult.failures.length) {
         await gitToolkit.checks.update({
@@ -106,36 +109,6 @@ const main = async () => {
         annotations.length = 0
       }
     }
-
-
-    // if (annotations.length > 50) annotations.length = 50 // checks limit: 50
-
-    // await gitToolkit.checks.create({
-    //   owner,
-    //   repo,
-    //   head_sha,
-    //   name: 'Linter',
-    //   status: 'completed',
-    //   conclusion: lintResult.errorCount ? CONCLUSION.FAILURE : CONCLUSION.SUCCESS,
-    //   output: {
-    //     title: 'Tslint Check Report',
-    //     summary: `${lintResult.errorCount} errors\n${lintResult.warningCount} warnings`,
-    //     annotations,
-    //   },
-    // })
-
-    // await gitToolkit.checks.update({
-    //   owner,
-    //   repo,
-    //   check_run_id: check.data.id,
-    //   name: LINTER,
-    //   status: 'completed',
-    //   conclusion: lintResult.errorCount ? CONCLUSION.FAILURE : CONCLUSION.SUCCESS,
-    //   output: {
-    //     title: 'Tslint Check Report',
-    //     summary: `${lintResult.errorCount} errors\n${lintResult.warningCount} warnings`,
-    //   },
-    // })
   } catch (err) {
     core.setFailed(`Action failed with error: ${err}`)
   }
