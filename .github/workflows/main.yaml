@@ -10,7 +10,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Lint
-        uses: akasai/ts-lint-action@1.2.3
+        uses: akasai/ts-lint-action@1.2.4
         with:
           lintFile: 'tslint.json'
           token: ${{ secrets.GITHUB_TOKEN }}
