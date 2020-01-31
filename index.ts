@@ -65,7 +65,7 @@ const main = async () => {
 
     const lintResult = linter.getResult()
 
-    if (!lintResult.failures) {
+    if (!lintResult.failures.length) {
       await gitToolkit.checks.update({
         owner,
         repo,
